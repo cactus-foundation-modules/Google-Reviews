@@ -1,0 +1,45 @@
+{
+  "name": "google-reviews",
+  "version": "0.1.0",
+  "tablePrefix": "grv_",
+  "description": "Brings your Google reviews onto your own site. Finds your business on Google, pulls its reviews in by itself every day, hides anything under the star rating you choose, and shows them however you like - a carousel that slides along on its own, a grid, a list, a wall of quotes or a simple rating badge.",
+  "requiresCoreVersion": "0.5.1946",
+  "permissions": [
+    "googlereviews.manage"
+  ],
+  "cspOrigins": {
+    "img": [
+      "https://lh3.googleusercontent.com",
+      "https://*.googleusercontent.com"
+    ]
+  },
+  "cronJobs": [
+    {
+      "path": "/api/m/google-reviews/cron/refresh",
+      "schedule": "0 5 * * *"
+    }
+  ],
+  "settingsTabs": [
+    {
+      "id": "google-reviews",
+      "label": "Google Reviews",
+      "permission": "googlereviews.manage",
+      "import": "./components/SettingsTab",
+      "component": "GoogleReviewsSettingsTab",
+      "parent": "general"
+    }
+  ],
+  "puckBlocks": [
+    {
+      "type": "GoogleReviews",
+      "import": "./components/puck/GoogleReviewsBlock",
+      "rscImport": "./components/puck/GoogleReviewsBlock.rsc",
+      "component": "googleReviewsPuckComponent",
+      "rscComponent": "googleReviewsPuckRscComponent"
+    }
+  ],
+  "teardown": [
+    "grv_reviews",
+    "grv_settings"
+  ]
+}
