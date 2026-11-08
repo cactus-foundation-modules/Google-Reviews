@@ -1,6 +1,6 @@
 {
   "name": "google-reviews",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "tablePrefix": "grv_",
   "description": "Brings your Google reviews onto your own site. Finds your business on Google, pulls its reviews in by itself every day, hides anything under the star rating you choose, and shows them however you like - a carousel that slides along on its own, a grid, a list, a wall of quotes or a simple rating badge.",
   "requiresCoreVersion": "0.5.1946",
@@ -35,7 +35,29 @@
       "import": "./components/puck/GoogleReviewsBlock",
       "rscImport": "./components/puck/GoogleReviewsBlock.rsc",
       "component": "googleReviewsPuckComponent",
-      "rscComponent": "googleReviewsPuckRscComponent"
+      "rscComponent": "googleReviewsPuckRscComponent",
+      "layoutTypes": [
+        "shopIndex",
+        "shopCategory",
+        "shopCollection",
+        "shopTag",
+        "shopSupplier",
+        "shopProduct",
+        "shopProductDetail",
+        "shopCart",
+        "shopCheckout",
+        "shopConfirmation",
+        "filterCollection",
+        "productDiscovery",
+        "quoteRequest",
+        "searchResults",
+        "gazetteCategory",
+        "gazetteEntry",
+        "directoryCategory",
+        "directoryEntry",
+        "boardsCategory",
+        "boardsEntry"
+      ]
     }
   ],
   "teardown": [
