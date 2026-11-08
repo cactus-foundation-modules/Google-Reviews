@@ -136,8 +136,14 @@ a.grv__name:hover, a.grv__name:focus-visible { text-decoration: underline; }
 .grv__dot[aria-current='true'] { width: 24px; background: var(--grv-dot-active, var(--color-primary)); }
 .grv__arrow:focus-visible, .grv__pause:focus-visible, .grv__dot:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
 
-/* Ticker: two copies of the reviews side by side, sliding half their width. */
-.grv__ticker { overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent); mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent); }
+/* Ticker: two copies of the reviews side by side, sliding half their width.
+   overflow: hidden clips the strip but does NOT shrink its intrinsic width, so
+   the strip's full max-content length still counted as the block's minimum
+   width - and inside a grid with an auto column (the shop checkout) that column
+   grew to fit it, shoving everything above off the page. A minmax(0, 1fr) grid
+   (the carousel's own trick) plus inline-size containment gives it a minimum of
+   nothing, so it takes the width it is given and no more. */
+.grv__ticker { display: grid; grid-template-columns: minmax(0, 1fr); contain: inline-size; overflow: hidden; -webkit-mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent); mask-image: linear-gradient(to right, transparent, black 6%, black 94%, transparent); }
 .grv__ticker-track { display: flex; gap: var(--grv-gap, 24px); width: max-content; padding-right: var(--grv-gap, 24px); animation: grv-ticker var(--grv-ticker-duration, 40s) linear infinite; }
 .grv__ticker-track > .grv__slide { flex: 0 0 auto; width: clamp(260px, 28vw, 380px); }
 .grv--pause-hover .grv__ticker:hover .grv__ticker-track,

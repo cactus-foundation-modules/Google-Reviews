@@ -60,6 +60,7 @@ export interface GoogleReviewsBlockProps {
   transitionMs?: number
   tickerSeconds?: number
   showSummary?: string
+  showRatingCount?: string
   showAuthorPhoto?: string
   dateDisplay?: string
   showSource?: string
@@ -131,6 +132,7 @@ export interface DisplayConfig {
   transitionMs: number
   tickerSeconds: number
   showSummary: boolean
+  showRatingCount: boolean
   showAuthorPhoto: boolean
   dateDisplay: DateDisplay
   showSource: boolean
@@ -173,6 +175,7 @@ export const DEFAULT_PROPS: Required<Omit<GoogleReviewsBlockProps, 'id'>> = {
   transitionMs: 600,
   tickerSeconds: 40,
   showSummary: 'yes',
+  showRatingCount: 'yes',
   showAuthorPhoto: 'yes',
   dateDisplay: 'relative',
   showSource: 'yes',
@@ -319,6 +322,7 @@ export function toDisplayConfig(props: GoogleReviewsBlockProps): DisplayConfig {
     transitionMs: clampNumber(props.transitionMs, 150, 3000, defaults.transitionMs),
     tickerSeconds: clampNumber(props.tickerSeconds, 10, 300, defaults.tickerSeconds),
     showSummary: isYes(props.showSummary, defaults.showSummary),
+    showRatingCount: isYes(props.showRatingCount, defaults.showRatingCount),
     showAuthorPhoto: isYes(props.showAuthorPhoto, defaults.showAuthorPhoto),
     dateDisplay: pick(props.dateDisplay, DATE_DISPLAYS, 'relative'),
     showSource: isYes(props.showSource, defaults.showSource),

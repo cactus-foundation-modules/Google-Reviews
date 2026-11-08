@@ -365,7 +365,7 @@ export function ReviewsDisplay({ config, payload, notice }: ReviewsDisplayProps)
       <div className="grv__inner">
         {notice && <p className="grv__notice">{notice}</p>}
         {isBadge ? (
-          <ReviewsBadge summary={payload.summary} />
+          <ReviewsBadge config={config} summary={payload.summary} />
         ) : (
           <>
             <ReviewsHeader config={config} summary={payload.summary} />

@@ -106,20 +106,20 @@ export function ReviewsHeader({ config, summary }: { config: DisplayConfig; summ
         <div className="grv__summary">
           <span className="grv__summary-score">{summary.rating.toFixed(1)}</span>
           <Stars rating={summary.rating} />
-          <span className="grv__summary-count">{ratingCountLabel(summary.ratingCount)}</span>
+          {config.showRatingCount && <span className="grv__summary-count">{ratingCountLabel(summary.ratingCount)}</span>}
         </div>
       )}
     </header>
   )
 }
 
-export function ReviewsBadge({ summary }: { summary: PlaceSummary }): ReactElement | null {
+export function ReviewsBadge({ config, summary }: { config: DisplayConfig; summary: PlaceSummary }): ReactElement | null {
   if (summary.rating === null) return null
   const content = (
     <>
       <span className="grv__badge-score">{summary.rating.toFixed(1)}</span>
       <Stars rating={summary.rating} />
-      <span className="grv__badge-count">{ratingCountLabel(summary.ratingCount)}</span>
+      {config.showRatingCount && <span className="grv__badge-count">{ratingCountLabel(summary.ratingCount)}</span>}
     </>
   )
   return summary.mapsUrl ? (

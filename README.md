@@ -36,7 +36,7 @@ Google hands over at most **five reviews per request**, chosen by its own idea o
 
 The sidebar has three tabs.
 
-- **Block** - display style, heading, introduction, how many reviews, lowest star rating, order, whether it moves on by itself and how often, arrows, dots, reviewer photos, dates, and the links to your Google page and to leave a review.
+- **Block** - display style, heading, introduction, how many reviews, lowest star rating, order, whether to show the overall rating and how many reviews it comes from, whether it moves on by itself and how often, arrows, dots, reviewer photos, dates, and the links to your Google page and to leave a review.
 - **Appearance** - card style, shadow, corners, border, text and heading sizes, star size, quote mark, photo shape, cutting long reviews short, and fifteen colours (section, card, text, border, heading, introduction, dates, stars, empty stars, quote mark, links, arrow buttons, dots). Every colour picks from the site's own palette and takes a separate dark mode colour.
 - **Layout** - reviews across on a computer, tablet and phone, spacing between and inside the cards, equal-height cards, alignment, arrow position, maximum width and space above and below.
 

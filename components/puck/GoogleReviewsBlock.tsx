@@ -40,7 +40,7 @@ const FIELD_TABS: FieldTabMap = {
   heading: 'block', headingTag: 'block', intro: 'block', display: 'block', maxReviews: 'block',
   minRating: 'block', requireText: 'block', sortBy: 'block', autoScroll: 'block', interval: 'block',
   pauseOnHover: 'block', showArrows: 'block', showDots: 'block', transitionMs: 'block', tickerSeconds: 'block',
-  showSummary: 'block', showAuthorPhoto: 'block', dateDisplay: 'block', showSource: 'block', linkCards: 'block',
+  showSummary: 'block', showRatingCount: 'block', showAuthorPhoto: 'block', dateDisplay: 'block', showSource: 'block', linkCards: 'block',
   showGoogleLink: 'block', googleLinkLabel: 'block', showWriteReview: 'block', writeReviewLabel: 'block',
   emptyText: 'block',
   cardStyle: 'appearance', cardShadow: 'appearance', cardRadius: 'appearance', cardBorderWidth: 'appearance',
@@ -83,6 +83,7 @@ const fields = {
   },
   intro: { type: 'textarea' as const, label: 'Introduction' },
   showSummary: { type: 'radio' as const, label: 'Show overall rating under the heading', options: yesNo },
+  showRatingCount: { type: 'radio' as const, label: 'Show how many Google reviews ("from 7 Google reviews")', options: yesNo },
   maxReviews: { type: 'number' as const, label: 'Most reviews to show', min: 1, max: 50 },
   minRating: {
     type: 'select' as const,
@@ -283,7 +284,12 @@ export const googleReviewsPuckComponent = {
   fieldTabs: FIELD_TABS,
   defaultProps: DEFAULT_PROPS,
   resolveFields(data: { props: GoogleReviewsBlockProps }, { fields: current }: { fields: typeof fields }) {
-    return fieldsForDisplay(current, data.props.display ?? DEFAULT_PROPS.display)
+    const display = data.props.display ?? DEFAULT_PROPS.display
+    const next = fieldsForDisplay(current, display)
+    // The count sits in the overall rating, so with that switched off (and no
+    // badge, which always shows it) there is nothing for it to hide.
+    if (display !== 'badge' && data.props.showSummary === 'no') delete next.showRatingCount
+    return next
   },
   render: GoogleReviewsEditorRender,
 }
