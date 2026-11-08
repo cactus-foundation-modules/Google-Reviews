@@ -123,7 +123,7 @@ function FindBusiness({ hasApiKey, onPick }: { hasApiKey: boolean; onPick: (resu
                   <strong>{result.name}</strong>
                   {result.rating !== null && <> · {result.rating.toFixed(1)} ★ ({result.ratingCount ?? 0})</>}
                   <br />
-                  <span className="field-hint">{result.address}</span>
+                  <span className="field-hint">{result.address || 'No public address - covers an area'}</span>
                 </span>
               </button>
             </li>

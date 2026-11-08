@@ -211,7 +211,10 @@ export async function searchPlaces(apiKey: string, query: string): Promise<Place
       'X-Goog-Api-Key': apiKey,
       'X-Goog-FieldMask': SEARCH_FIELD_MASK,
     },
-    body: JSON.stringify({ textQuery: query, pageSize: 8 }),
+    // Google leaves out businesses that hide their address (delivery-only shops,
+    // mobile trades) unless asked for them, so a search for one by its exact
+    // name comes back empty. Plenty of small businesses are exactly that.
+    body: JSON.stringify({ textQuery: query, pageSize: 8, includePureServiceAreaBusinesses: true }),
   })
   const parsed = SearchResponseSchema.safeParse(body)
   if (!parsed.success) throw new GooglePlacesError('Google answered, but not in a shape this module understands.')
