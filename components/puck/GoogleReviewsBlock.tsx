@@ -1,7 +1,7 @@
 import type { ReactElement } from 'react'
 // Field widget via the registry, never a direct import: the widget module pulls
 // in the Puck editor, and the server half of this block spreads this object.
-import { SiteColourField } from '@/lib/puck/fields/registry'
+import { SiteColourField, SiteFontField } from '@/lib/puck/fields/registry'
 import type { FieldTabMap } from '@/lib/puck/fields/fieldTabs'
 import { DEFAULT_PROPS, type GoogleReviewsBlockProps } from '@/modules/google-reviews/lib/display'
 import { GoogleReviewsEditorPreview } from '@/modules/google-reviews/components/puck/GoogleReviewsEditorPreview'
@@ -23,6 +23,19 @@ function colourField(label: string) {
   }
 }
 
+type FontFieldRenderProps = { value: string; onChange: (value: string) => void; field: { label?: string } }
+
+// The site's own fonts (Appearance, Styles, Typography) first, then Google's.
+function fontField(label: string) {
+  return {
+    type: 'custom' as const,
+    label,
+    render: ({ value, onChange, field }: FontFieldRenderProps) => (
+      <SiteFontField value={value ?? ''} onChange={onChange} label={field.label} />
+    ),
+  }
+}
+
 const yesNo = [
   { value: 'yes', label: 'Yes' },
   { value: 'no', label: 'No' },
@@ -39,12 +52,12 @@ const alignOptions = [
 const FIELD_TABS: FieldTabMap = {
   heading: 'block', headingTag: 'block', intro: 'block', display: 'block', maxReviews: 'block',
   minRating: 'block', requireText: 'block', sortBy: 'block', autoScroll: 'block', interval: 'block',
-  pauseOnHover: 'block', showArrows: 'block', showDots: 'block', transitionMs: 'block', tickerSeconds: 'block',
+  pauseOnHover: 'block', showPauseButton: 'block', showArrows: 'block', showDots: 'block', transitionMs: 'block', tickerSeconds: 'block',
   showSummary: 'block', showRatingCount: 'block', showAuthorPhoto: 'block', dateDisplay: 'block', showSource: 'block', linkCards: 'block',
   showGoogleLink: 'block', googleLinkLabel: 'block', showWriteReview: 'block', writeReviewLabel: 'block',
   emptyText: 'block',
   cardStyle: 'appearance', cardShadow: 'appearance', cardRadius: 'appearance', cardBorderWidth: 'appearance',
-  textSize: 'appearance', headingSize: 'appearance', starSize: 'appearance', textStyle: 'appearance',
+  textSize: 'appearance', headingSize: 'appearance', headingFont: 'appearance', ratingFont: 'appearance', starSize: 'appearance', textStyle: 'appearance',
   showQuoteMark: 'appearance', photoShape: 'appearance', lineClamp: 'appearance',
   sectionBgColor: 'appearance', cardBgColor: 'appearance', cardTextColor: 'appearance', cardBorderColor: 'appearance',
   headingColor: 'appearance', introColor: 'appearance', metaColor: 'appearance', starColor: 'appearance',
@@ -112,6 +125,7 @@ const fields = {
   transitionMs: { type: 'number' as const, label: 'Slide speed in milliseconds', min: 150, max: 3000 },
   tickerSeconds: { type: 'number' as const, label: 'Seconds for one full lap', min: 10, max: 300 },
   pauseOnHover: { type: 'radio' as const, label: 'Pause while the pointer is over it', options: yesNo },
+  showPauseButton: { type: 'radio' as const, label: 'Show the pause button', options: yesNo },
   showArrows: { type: 'radio' as const, label: 'Show arrows', options: yesNo },
   showDots: { type: 'radio' as const, label: 'Show dots', options: yesNo },
   showAuthorPhoto: { type: 'radio' as const, label: 'Show reviewer photos', options: yesNo },
@@ -183,6 +197,8 @@ const fields = {
       { value: 'xl', label: 'Extra large' },
     ],
   },
+  headingFont: fontField('Heading font (blank uses the site heading font)'),
+  ratingFont: fontField('Rating number font (blank matches the text around it)'),
   starSize: { type: 'number' as const, label: 'Star size (px)', min: 10, max: 48 },
   showQuoteMark: { type: 'radio' as const, label: 'Show a large quote mark', options: yesNo },
   photoShape: {
@@ -244,6 +260,7 @@ const ONLY_FOR: Partial<Record<FieldName, readonly string[]>> = {
   showDots: ['carousel', 'spotlight'],
   controlsPosition: ['carousel', 'spotlight'],
   pauseOnHover: ['carousel', 'spotlight', 'ticker'],
+  showPauseButton: ['carousel', 'spotlight', 'ticker'],
   tickerSeconds: ['ticker'],
   columns: ['carousel', 'grid', 'masonry'],
   columnsTablet: ['carousel', 'grid', 'masonry'],
@@ -255,7 +272,7 @@ const ONLY_FOR: Partial<Record<FieldName, readonly string[]>> = {
 const CARD_ONLY: readonly FieldName[] = [
   'heading', 'headingTag', 'intro', 'showSummary', 'maxReviews', 'minRating', 'requireText', 'sortBy',
   'showAuthorPhoto', 'dateDisplay', 'showSource', 'linkCards', 'emptyText', 'cardStyle', 'textSize', 'textStyle',
-  'lineClamp', 'headingSize', 'showQuoteMark', 'photoShape', 'cardTextColor', 'headingColor', 'introColor',
+  'lineClamp', 'headingSize', 'headingFont', 'showQuoteMark', 'photoShape', 'cardTextColor', 'headingColor', 'introColor',
   'quoteColor', 'controlBgColor', 'controlColor', 'dotColor', 'dotActiveColor', 'gap', 'cardPadding', 'equalHeight',
   'contentAlign', 'headerAlign',
 ]
@@ -288,7 +305,12 @@ export const googleReviewsPuckComponent = {
     const next = fieldsForDisplay(current, display)
     // The count sits in the overall rating, so with that switched off (and no
     // badge, which always shows it) there is nothing for it to hide.
-    if (display !== 'badge' && data.props.showSummary === 'no') delete next.showRatingCount
+    if (display !== 'badge' && data.props.showSummary === 'no') {
+      delete next.showRatingCount
+      delete next.ratingFont
+    }
+    // A carousel or spotlight that never moves on by itself has no pause button.
+    if (display !== 'ticker' && data.props.autoScroll === 'no') delete next.showPauseButton
     return next
   },
   render: GoogleReviewsEditorRender,

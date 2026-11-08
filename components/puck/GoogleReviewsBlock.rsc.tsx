@@ -2,7 +2,7 @@ import type { ReactElement } from 'react'
 import { SharedStyle } from '@/components/SharedStyle'
 import { reviewsCss } from '@/modules/google-reviews/components/public/reviews-css'
 import { ReviewsDisplay } from '@/modules/google-reviews/components/public/ReviewsDisplay'
-import { toDisplayConfig, type GoogleReviewsBlockProps } from '@/modules/google-reviews/lib/display'
+import { blockFontHrefs, toDisplayConfig, type GoogleReviewsBlockProps } from '@/modules/google-reviews/lib/display'
 import { getPublicPayload } from '@/modules/google-reviews/lib/store'
 import { googleReviewsPuckComponent } from '@/modules/google-reviews/components/puck/GoogleReviewsBlock'
 
@@ -13,10 +13,12 @@ import { googleReviewsPuckComponent } from '@/modules/google-reviews/components/
 
 export async function GoogleReviewsBlockRsc(props: GoogleReviewsBlockProps): Promise<ReactElement> {
   const payload = await getPublicPayload()
+  const config = toDisplayConfig(props)
   return (
     <>
       <SharedStyle id="google-reviews" css={reviewsCss()} />
-      <ReviewsDisplay config={toDisplayConfig(props)} payload={payload} />
+      {blockFontHrefs(config, props.puck).map((href) => <link key={href} rel="stylesheet" href={href} />)}
+      <ReviewsDisplay config={config} payload={payload} />
     </>
   )
 }

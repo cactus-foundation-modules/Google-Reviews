@@ -5,6 +5,7 @@
 // from ever drawing different markup for the same settings.
 
 import type { CSSProperties } from 'react'
+import { blockFontHref, type LoadedFontsMetadata } from '@/lib/puck/blockFont'
 import type { PublicReview } from '@/modules/google-reviews/lib/types'
 
 export const DISPLAY_MODES = ['carousel', 'grid', 'list', 'masonry', 'spotlight', 'ticker', 'badge'] as const
@@ -43,6 +44,8 @@ export type ControlsPosition = (typeof CONTROLS_POSITIONS)[number]
 /** Every prop the block saves. Puck hands them over loosely typed, so all are optional. */
 export interface GoogleReviewsBlockProps {
   id?: string
+  /** Puck's render context. Only `metadata.loadedFonts` is read, to skip a font the page already loads. */
+  puck?: { metadata?: LoadedFontsMetadata }
   // Block - what it says and does
   heading?: string
   headingTag?: string
@@ -55,6 +58,7 @@ export interface GoogleReviewsBlockProps {
   autoScroll?: string
   interval?: number
   pauseOnHover?: string
+  showPauseButton?: string
   showArrows?: string
   showDots?: string
   transitionMs?: number
@@ -97,6 +101,9 @@ export interface GoogleReviewsBlockProps {
   showQuoteMark?: string
   photoShape?: string
   lineClamp?: number
+  /** Whatever SiteFontField writes: a site font's family or a Google family. Blank = the site's own. */
+  headingFont?: string
+  ratingFont?: string
   // Layout - where it sits and how much room it takes
   columns?: number
   columnsTablet?: number
@@ -127,6 +134,7 @@ export interface DisplayConfig {
   autoScroll: boolean
   intervalMs: number
   pauseOnHover: boolean
+  showPauseButton: boolean
   showArrows: boolean
   showDots: boolean
   transitionMs: number
@@ -150,6 +158,10 @@ export interface DisplayConfig {
   showQuoteMark: boolean
   photoShape: PhotoShape
   lineClamp: number
+  /** A checked font-family for the heading, or null to leave the site's heading font alone. */
+  headingFont: string | null
+  /** A checked font-family for the overall score (and the badge's), or null for the inherited one. */
+  ratingFont: string | null
   equalHeight: boolean
   contentAlign: Alignment
   headerAlign: Alignment
@@ -158,7 +170,7 @@ export interface DisplayConfig {
   style: CSSProperties
 }
 
-export const DEFAULT_PROPS: Required<Omit<GoogleReviewsBlockProps, 'id'>> = {
+export const DEFAULT_PROPS: Required<Omit<GoogleReviewsBlockProps, 'id' | 'puck'>> = {
   heading: 'What our customers say',
   headingTag: 'h2',
   intro: '',
@@ -170,6 +182,7 @@ export const DEFAULT_PROPS: Required<Omit<GoogleReviewsBlockProps, 'id'>> = {
   autoScroll: 'yes',
   interval: 5,
   pauseOnHover: 'yes',
+  showPauseButton: 'yes',
   showArrows: 'yes',
   showDots: 'yes',
   transitionMs: 600,
@@ -211,6 +224,8 @@ export const DEFAULT_PROPS: Required<Omit<GoogleReviewsBlockProps, 'id'>> = {
   showQuoteMark: 'no',
   photoShape: 'circle',
   lineClamp: 6,
+  headingFont: '',
+  ratingFont: '',
   columns: 3,
   columnsTablet: 2,
   columnsMobile: 1,
@@ -242,17 +257,26 @@ function textOr(value: string | undefined, fallback: string): string {
   return typeof value === 'string' ? value : fallback
 }
 
-// A colour goes into an inline style, where a stray ";" or "}" would let it
-// write declarations of its own. Anything carrying those, markup, or a url()
-// is dropped - the block falls back to the theme colour instead.
-const UNSAFE_COLOUR = /[;{}<>\\]|url\s*\(|expression\s*\(|@import/i
+// A colour or font goes into an inline style, where a stray ";" or "}" would
+// let it write declarations of its own. Anything carrying those, markup, or a
+// url() is dropped - the block falls back to the theme's own instead.
+const UNSAFE_STYLE_VALUE = /[;{}<>\\]|url\s*\(|expression\s*\(|@import/i
+
+function safeStyleValue(value: string | undefined): string | null {
+  if (typeof value !== 'string') return null
+  const trimmed = value.trim()
+  if (!trimmed || trimmed.length > 200 || UNSAFE_STYLE_VALUE.test(trimmed)) return null
+  return trimmed
+}
 
 /** A colour value safe to put in a custom property, or null. */
 export function safeColour(value: string | undefined): string | null {
-  if (typeof value !== 'string') return null
-  const trimmed = value.trim()
-  if (!trimmed || trimmed.length > 200 || UNSAFE_COLOUR.test(trimmed)) return null
-  return trimmed
+  return safeStyleValue(value)
+}
+
+/** A font-family safe to put in an inline style, or null. Free text from the sidebar's search box. */
+export function safeFontFamily(value: string | undefined): string | null {
+  return safeStyleValue(value)
 }
 
 // Prop name -> the custom property the stylesheet reads it through.
@@ -317,6 +341,7 @@ export function toDisplayConfig(props: GoogleReviewsBlockProps): DisplayConfig {
     autoScroll: isYes(props.autoScroll, defaults.autoScroll),
     intervalMs: clampNumber(props.interval, 2, 60, defaults.interval) * 1000,
     pauseOnHover: isYes(props.pauseOnHover, defaults.pauseOnHover),
+    showPauseButton: isYes(props.showPauseButton, defaults.showPauseButton),
     showArrows: isYes(props.showArrows, defaults.showArrows),
     showDots: isYes(props.showDots, defaults.showDots),
     transitionMs: clampNumber(props.transitionMs, 150, 3000, defaults.transitionMs),
@@ -340,12 +365,26 @@ export function toDisplayConfig(props: GoogleReviewsBlockProps): DisplayConfig {
     showQuoteMark: isYes(props.showQuoteMark, defaults.showQuoteMark),
     photoShape: pick(props.photoShape, PHOTO_SHAPES, 'circle'),
     lineClamp: clampNumber(props.lineClamp, 0, 30, defaults.lineClamp),
+    headingFont: safeFontFamily(props.headingFont),
+    ratingFont: safeFontFamily(props.ratingFont),
     equalHeight: isYes(props.equalHeight, defaults.equalHeight),
     contentAlign: pick(props.contentAlign, ALIGNMENTS, 'left'),
     headerAlign: pick(props.headerAlign, ALIGNMENTS, 'center'),
     controlsPosition: pick(props.controlsPosition, CONTROLS_POSITIONS, 'sides'),
     style: buildStyle(props),
   }
+}
+
+/**
+ * The stylesheets this block has to ask for itself: a chosen Google face that
+ * the page is not already loading. A site or system font adds nothing. In the
+ * editor there is no metadata, so it always asks - one spare request at most.
+ */
+export function blockFontHrefs(config: DisplayConfig, puck?: GoogleReviewsBlockProps['puck']): string[] {
+  const hrefs = [config.headingFont, config.ratingFont]
+    .map((family) => blockFontHref(family ?? undefined, puck))
+    .filter((href): href is string => href !== null)
+  return [...new Set(hrefs)]
 }
 
 function publishedTime(review: PublicReview): number {

@@ -9,7 +9,7 @@ import { useEffect, useState, type ReactElement } from 'react'
 import { SharedStyle } from '@/components/SharedStyle'
 import { reviewsCss } from '@/modules/google-reviews/components/public/reviews-css'
 import { ReviewsDisplay } from '@/modules/google-reviews/components/public/ReviewsDisplay'
-import { toDisplayConfig, type GoogleReviewsBlockProps } from '@/modules/google-reviews/lib/display'
+import { blockFontHrefs, toDisplayConfig, type GoogleReviewsBlockProps } from '@/modules/google-reviews/lib/display'
 import type { ReviewsPayload } from '@/modules/google-reviews/lib/types'
 
 const DAY = 24 * 60 * 60 * 1000
@@ -74,6 +74,7 @@ export function GoogleReviewsEditorPreview(props: GoogleReviewsBlockProps): Reac
   return (
     <>
       <SharedStyle id="google-reviews" css={reviewsCss()} />
+      {blockFontHrefs(config).map((href) => <link key={href} rel="stylesheet" href={href} />)}
       <ReviewsDisplay config={config} payload={shown} notice={notice} />
     </>
   )

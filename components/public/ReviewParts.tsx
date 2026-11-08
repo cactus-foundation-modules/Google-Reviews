@@ -100,11 +100,17 @@ export function ReviewsHeader({ config, summary }: { config: DisplayConfig; summ
   if (!config.heading && !config.intro && !showSummary) return null
   return (
     <header className={`grv__header grv__header--${config.headerAlign}`}>
-      {config.heading && <HeadingTag className="grv__heading">{config.heading}</HeadingTag>}
+      {config.heading && (
+        <HeadingTag className="grv__heading" style={config.headingFont ? { fontFamily: config.headingFont } : undefined}>
+          {config.heading}
+        </HeadingTag>
+      )}
       {config.intro && <p className="grv__intro">{config.intro}</p>}
       {showSummary && summary.rating !== null && (
         <div className="grv__summary">
-          <span className="grv__summary-score">{summary.rating.toFixed(1)}</span>
+          <span className="grv__summary-score" style={config.ratingFont ? { fontFamily: config.ratingFont } : undefined}>
+            {summary.rating.toFixed(1)}
+          </span>
           <Stars rating={summary.rating} />
           {config.showRatingCount && <span className="grv__summary-count">{ratingCountLabel(summary.ratingCount)}</span>}
         </div>
@@ -117,7 +123,9 @@ export function ReviewsBadge({ config, summary }: { config: DisplayConfig; summa
   if (summary.rating === null) return null
   const content = (
     <>
-      <span className="grv__badge-score">{summary.rating.toFixed(1)}</span>
+      <span className="grv__badge-score" style={config.ratingFont ? { fontFamily: config.ratingFont } : undefined}>
+        {summary.rating.toFixed(1)}
+      </span>
       <Stars rating={summary.rating} />
       {config.showRatingCount && <span className="grv__badge-count">{ratingCountLabel(summary.ratingCount)}</span>}
     </>

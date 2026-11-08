@@ -6,9 +6,10 @@
 // so the markup cannot drift between the two.
 //
 // Only the carousel, spotlight and ticker move, and only they hold state. Every
-// moving layout has a pause button: anything that moves for more than five
-// seconds needs one (WCAG 2.2.2), and a visitor who has asked their device for
-// reduced motion starts paused.
+// moving layout has a pause button by default: anything that moves for more
+// than five seconds needs one (WCAG 2.2.2), and a visitor who has asked their
+// device for reduced motion starts paused. An owner can switch the button off;
+// reduced motion is still honoured without it.
 
 import { useCallback, useEffect, useRef, useState, type FocusEvent, type ReactElement, type RefObject, type TransitionEvent } from 'react'
 import type { PublicReview, ReviewsPayload } from '@/modules/google-reviews/lib/types'
@@ -211,7 +212,8 @@ function Carousel({ reviews, config, now, rootRef }: {
     : {}
   const arrowsAtSides = config.showArrows && scrollable && config.controlsPosition === 'sides'
   const arrowsBelow = config.showArrows && scrollable && config.controlsPosition === 'below'
-  const showControls = scrollable && (arrowsBelow || config.showDots || config.autoScroll)
+  const showPause = config.autoScroll && config.showPauseButton
+  const showControls = scrollable && (arrowsBelow || config.showDots || showPause)
 
   return (
     <div className="grv__carousel-wrap" role="region" aria-roledescription="carousel" aria-label="Customer reviews" {...hoverHandlers}>
@@ -260,7 +262,7 @@ function Carousel({ reviews, config, now, rootRef }: {
               ))}
             </div>
           )}
-          {config.autoScroll && <PauseButton paused={paused} onToggle={() => setUserPaused(!paused)} />}
+          {showPause && <PauseButton paused={paused} onToggle={() => setUserPaused(!paused)} />}
           {arrowsBelow && <ArrowButton direction="next" onClick={next} />}
         </div>
       )}
@@ -290,9 +292,11 @@ function Ticker({ reviews, config, now }: { reviews: PublicReview[]; config: Dis
           })}
         </div>
       </div>
-      <div className="grv__controls">
-        <PauseButton paused={userPaused} onToggle={() => setUserPaused(!userPaused)} />
-      </div>
+      {config.showPauseButton && (
+        <div className="grv__controls">
+          <PauseButton paused={userPaused} onToggle={() => setUserPaused(!userPaused)} />
+        </div>
+      )}
     </div>
   )
 }

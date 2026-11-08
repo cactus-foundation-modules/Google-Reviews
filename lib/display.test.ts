@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { relativeTimeLabel, safeColour, selectReviews, toDisplayConfig } from './display'
+import { blockFontHrefs, relativeTimeLabel, safeColour, safeFontFamily, selectReviews, toDisplayConfig } from './display'
 import type { PublicReview } from './types'
 
 function review(id: string, rating: number, text: string, publishedAt: string | null): PublicReview {
@@ -59,6 +59,31 @@ describe('safeColour', () => {
   it('accepts ordinary colour values', () => {
     expect(safeColour('var(--color-3)')).toBe('var(--color-3)')
     expect(safeColour('rgb(0 0 0 / 50%)')).toBe('rgb(0 0 0 / 50%)')
+  })
+})
+
+describe('fonts and the pause button', () => {
+  it('leaves both fonts to the site and shows the pause button by default', () => {
+    const config = toDisplayConfig({})
+    expect(config.headingFont).toBeNull()
+    expect(config.ratingFont).toBeNull()
+    expect(config.showPauseButton).toBe(true)
+  })
+
+  it('carries a chosen font through and refuses one that could break out of its style', () => {
+    expect(toDisplayConfig({ headingFont: ' Playfair Display ', ratingFont: 'Georgia, serif' })).toMatchObject({
+      headingFont: 'Playfair Display',
+      ratingFont: 'Georgia, serif',
+    })
+    expect(safeFontFamily('Inter; color: red')).toBeNull()
+    expect(toDisplayConfig({ showPauseButton: 'no' }).showPauseButton).toBe(false)
+  })
+
+  it('asks for a Google face once, and never for a system font or one the page already loads', () => {
+    const both = toDisplayConfig({ headingFont: 'Lora', ratingFont: 'Lora' })
+    expect(blockFontHrefs(both)).toHaveLength(1)
+    expect(blockFontHrefs(toDisplayConfig({ headingFont: 'Georgia, serif' }))).toEqual([])
+    expect(blockFontHrefs(both, { metadata: { loadedFonts: ['Lora'] } })).toEqual([])
   })
 })
 
