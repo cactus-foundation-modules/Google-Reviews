@@ -1,6 +1,6 @@
 {
   "name": "google-reviews",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "tablePrefix": "grv_",
   "description": "Brings your Google reviews onto your own site. Finds your business on Google, pulls its reviews in by itself every day, hides anything under the star rating you choose, and shows them however you like - a carousel that slides along on its own, a grid, a list, a wall of quotes or a simple rating badge.",
   "requiresCoreVersion": "0.5.1946",
@@ -37,6 +37,7 @@
       "component": "googleReviewsPuckComponent",
       "rscComponent": "googleReviewsPuckRscComponent",
       "layoutTypes": [
+        "footer",
         "shopIndex",
         "shopCategory",
         "shopCollection",
